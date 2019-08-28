@@ -1,5 +1,7 @@
 package com.chad.baserecyclerviewadapterhelper.adapter;
 
+import android.support.annotation.NonNull;
+
 import com.chad.baserecyclerviewadapterhelper.R;
 import com.chad.library.adapter.base.BaseItemDraggableAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
@@ -15,9 +17,8 @@ public class ItemDragAdapter extends BaseItemDraggableAdapter<String, BaseViewHo
     }
 
     @Override
-    protected void convert(BaseViewHolder helper, String item) {
-        switch (helper.getLayoutPosition() %
-                3) {
+    protected void convert(@NonNull BaseViewHolder helper, String item) {
+        switch (helper.getLayoutPosition() % 3) {
             case 0:
                 helper.setImageResource(R.id.iv_head, R.mipmap.head_img0);
                 break;
@@ -26,6 +27,8 @@ public class ItemDragAdapter extends BaseItemDraggableAdapter<String, BaseViewHo
                 break;
             case 2:
                 helper.setImageResource(R.id.iv_head, R.mipmap.head_img2);
+                break;
+            default:
                 break;
         }
         helper.setText(R.id.tv, item);

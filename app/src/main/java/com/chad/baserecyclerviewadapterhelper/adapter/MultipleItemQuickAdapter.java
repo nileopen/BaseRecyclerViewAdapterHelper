@@ -1,6 +1,7 @@
 package com.chad.baserecyclerviewadapterhelper.adapter;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import com.chad.baserecyclerviewadapterhelper.R;
 import com.chad.baserecyclerviewadapterhelper.entity.MultipleItem;
@@ -23,22 +24,25 @@ public class MultipleItemQuickAdapter extends BaseMultiItemQuickAdapter<Multiple
     }
 
     @Override
-    protected void convert(BaseViewHolder helper, MultipleItem item) {
+    protected void convert(@NonNull BaseViewHolder helper, MultipleItem item) {
         switch (helper.getItemViewType()) {
             case MultipleItem.TEXT:
                 helper.setText(R.id.tv, item.getContent());
                 break;
             case MultipleItem.IMG_TEXT:
-                switch (helper.getLayoutPosition() %
-                        2) {
+                switch (helper.getLayoutPosition() % 2) {
                     case 0:
                         helper.setImageResource(R.id.iv, R.mipmap.animation_img1);
                         break;
                     case 1:
                         helper.setImageResource(R.id.iv, R.mipmap.animation_img2);
                         break;
+                    default:
+                        break;
 
                 }
+                break;
+            default:
                 break;
         }
     }

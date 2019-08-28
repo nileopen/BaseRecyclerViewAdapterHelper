@@ -1,5 +1,6 @@
 package com.chad.baserecyclerviewadapterhelper.adapter;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 
@@ -9,6 +10,7 @@ import com.chad.baserecyclerviewadapterhelper.entity.Level1Item;
 import com.chad.baserecyclerviewadapterhelper.entity.Person;
 import com.chad.library.adapter.base.BaseMultiItemQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
+import com.chad.library.adapter.base.entity.IExpandable;
 import com.chad.library.adapter.base.entity.MultiItemEntity;
 
 import java.util.List;
@@ -22,6 +24,8 @@ public class ExpandableItemAdapter extends BaseMultiItemQuickAdapter<MultiItemEn
     public static final int TYPE_LEVEL_0 = 0;
     public static final int TYPE_LEVEL_1 = 1;
     public static final int TYPE_PERSON = 2;
+
+    private boolean isOnlyExpandOne = false;
 
     /**
      * Same as QuickAdapter#QuickAdapter(Context,int) but with
@@ -38,11 +42,10 @@ public class ExpandableItemAdapter extends BaseMultiItemQuickAdapter<MultiItemEn
 
 
     @Override
-    protected void convert(final BaseViewHolder holder, final MultiItemEntity item) {
+    protected void convert(@NonNull final BaseViewHolder holder, final MultiItemEntity item) {
         switch (holder.getItemViewType()) {
             case TYPE_LEVEL_0:
-                switch (holder.getLayoutPosition() %
-                        3) {
+                switch (holder.getLayoutPosition() % 3) {
                     case 0:
                         holder.setImageResource(R.id.iv_head, R.mipmap.head_img0);
                         break;
@@ -51,6 +54,8 @@ public class ExpandableItemAdapter extends BaseMultiItemQuickAdapter<MultiItemEn
                         break;
                     case 2:
                         holder.setImageResource(R.id.iv_head, R.mipmap.head_img2);
+                        break;
+                    default:
                         break;
                 }
                 final Level0Item lv0 = (Level0Item) item;
@@ -64,12 +69,17 @@ public class ExpandableItemAdapter extends BaseMultiItemQuickAdapter<MultiItemEn
                         Log.d(TAG, "Level 0 item pos: " + pos);
                         if (lv0.isExpanded()) {
                             collapse(pos);
+                        } else if (isOnlyExpandOne) {
+                            IExpandable willExpandItem = (IExpandable) getData().get(pos);
+                            for (int i = getHeaderLayoutCount(); i < getData().size(); i++) {
+                                IExpandable expandable = (IExpandable) getData().get(i);
+                                if (expandable.isExpanded()) {
+                                    collapse(i);
+                                }
+                            }
+                            expand(getData().indexOf(willExpandItem) + getHeaderLayoutCount());
                         } else {
-//                            if (pos % 3 == 0) {
-//                                expandAll(pos, false);
-//                            } else {
                             expand(pos);
-//                            }
                         }
                     }
                 });
@@ -96,7 +106,15 @@ public class ExpandableItemAdapter extends BaseMultiItemQuickAdapter<MultiItemEn
                     @Override
                     public boolean onLongClick(View v) {
                         int pos = holder.getAdapterPosition();
+                        // 先获取到当前 item 的父 positon，再移除自己
+                        int positionAtAll = getParentPositionInAll(pos);
                         remove(pos);
+                        if (positionAtAll != -1) {
+                            IExpandable multiItemEntity = (IExpandable) getData().get(positionAtAll);
+                            if (!hasSubItems(multiItemEntity)) {
+                                remove(positionAtAll);
+                            }
+                        }
                         return true;
                     }
                 });
@@ -108,10 +126,28 @@ public class ExpandableItemAdapter extends BaseMultiItemQuickAdapter<MultiItemEn
                     @Override
                     public void onClick(View view) {
                         int pos = holder.getAdapterPosition();
+                        // 先获取到当前 item 的父 positon，再移除自己
+                        int positionAtAll = getParentPositionInAll(pos);
                         remove(pos);
+                        if (positionAtAll != -1) {
+                            IExpandable multiItemEntity = (IExpandable) getData().get(positionAtAll);
+                            if (!hasSubItems(multiItemEntity)) {
+                                remove(positionAtAll);
+                            }
+                        }
                     }
                 });
                 break;
+            default:
+                break;
         }
+    }
+
+    public boolean isOnlyExpandOne() {
+        return isOnlyExpandOne;
+    }
+
+    public void setOnlyExpandOne(boolean onlyExpandOne) {
+        isOnlyExpandOne = onlyExpandOne;
     }
 }
